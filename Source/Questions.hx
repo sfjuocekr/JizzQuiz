@@ -13,6 +13,8 @@ class Questions
 	private var answer:String;
 	private var score:Int = 0;
 	
+	private var fails:Array<String> = new Array<String>();
+	
 	public function new(_questions:Array<Array<String>>)
 	{
 		questions = _questions.copy();
@@ -34,8 +36,19 @@ class Questions
 	
 	public function resolve(_input:String)
 	{
-		if (_input == null) score -= 2;
-		else (_input == answer) ? score += 2 : score -= 1;
+		if (_input != answer)
+		{
+			fails.push(question);
+			
+			score -= (question == null) ? 2 : 1;
+		}
+		else
+			score += 2;
+	}
+	
+	public function getFails(): Array<String>
+	{
+		return fails;
 	}
 	
 	public function get(): Array<String>

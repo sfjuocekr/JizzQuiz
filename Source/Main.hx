@@ -1,9 +1,11 @@
 package;
 
 import openfl.display.Sprite;
+import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 import openfl.events.TimerEvent;
 import openfl.utils.Timer;
+import openfl.Lib;
 
 /**
  * ...
@@ -19,22 +21,33 @@ class Main extends Sprite
 	private var counter:Timer = new Timer(1000, 0);
 	private var highscores:Highscores;
 	
+	private var quizType:String = "capitals";
+	
 	public function new()
 	{
 		super ();
-
+		
 		timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimer);
 		stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		stage.addEventListener(Event.RESIZE, onResize);
 		
-		newGame("capitals");
+		display = new Display();
+		addChild(display);
+		
+		display.set(["Press enter to start a new game!"]);
+	}
+	
+	private function onResize(_e:Event)
+	{
+		var _zoom = Math.min(stage.stageWidth / 1280, stage.stageHeight / 480);
+		
+		stage.scaleX = _zoom;
+		stage.scaleY = _zoom;
 	}
 	
 	private function newGame(_category:String)
 	{
-		questions = new Questions(db.readQuestions("capitals"));
-		display = new Display(questions);
-		
-		addChild(display);
+		questions = new Questions(db.readQuestions(quizType));
 		
 		advance();
 		counter.start();
@@ -44,30 +57,43 @@ class Main extends Sprite
 	{
 		timer.reset();
 		
-		removeChild(display);
+		var _fails:String = "";
 		
-		highscores = new Highscores(db, questions.getScore(), counter.currentCount);
-		addChild(highscores);
+		for (_fail in questions.getFails())
+			_fails = (_fails == "") ? _fail : (questions.getFails().indexOf(_fail) != questions.getFails().length - 1) ? _fails + ", " + _fail : _fails + " and " + _fail;
+		
+		_fails = _fails.charAt(0).toUpperCase() + _fails.substring(1) + ".";
+		
+		var _score = ((db.readQuestions("capitals").length * 5) - counter.currentCount) * questions.getScore();
+		
+		display.set(["Your score is: " + Std.string(_score), "", "You failed at:", "", _fails], 20, [4]);
+		
+		//highscores = new Highscores(db, questions.getScore(), counter.currentCount);
 		
 		counter.reset();
-		
-		display = null;
-		questions = null;
 	}
 	
 	private function advance()
 	{
-		if (questions.next()) endGame();
+		if (questions.next())
+			endGame();
 		else
 		{
-			for (_i in 0...4)
+			var _textArray:Array<String> = new Array<String>();
+			
+			_textArray = questions.get();
+			
+			for (_index in 0...4)
 			{
-				//display.textFields[_i].text = questions.get()[_i];
-				
-				// dirty hack to parse text
-				
-				display.textFields[_i].text = (_i > 0) ? Std.string(_i) + ": " + questions.get()[_i] : "What is the current capital of " + questions.get()[_i] + "?";
+				switch (quizType)
+				{
+					case "capitals": _textArray[_index] = (_index > 0) ? Std.string(_index) + ": " + _textArray[_index] : "What is the current capital of " + _textArray[_index] + "?";
+				}
 			}
+			
+			_textArray.insert(1, "");
+			
+			display.set(_textArray);
 			
 			timer.start();
 		}
@@ -90,33 +116,41 @@ class Main extends Sprite
 	
 	private function onKeyDown(_e:KeyboardEvent)
 	{
-		if (_e.keyCode == 27) Sys.exit(0);
+		trace(_e.keyCode);
+		
+		if (_e.keyCode == 27)
+			exit();
 		
 		if (timer.running && timer.currentCount != 5)
-		{
 			switch (_e.keyCode)
 			{
-				case 49:
-				{
-					resolve(questions.get()[1]);
-					
-					return;
-				}
-				
-				case 50:
-				{
-					resolve(questions.get()[2]);
-					
-					return;
-				}
-				
-				case 51:
-				{
-					resolve(questions.get()[3]);
-					
-					return;
-				}
+				case 49: resolve(questions.get()[1]);
+				case 50: resolve(questions.get()[2]);
+				case 51: resolve(questions.get()[3]);
 			}
-		}
+		else if (_e.keyCode == 13)
+			newGame("capitals");
+	}
+	
+	private function exit()
+	{
+		timer.reset();
+		counter.reset();
+		
+		timer.removeEventListener(TimerEvent.TIMER_COMPLETE, onTimer);
+		stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		
+		removeChildren();
+		
+		db = null;
+		questions = null;
+		display = null;
+		counter = null;
+		highscores = null;
+		
+		// this is weird, if you do timer = null the game closes...
+		timer = null;
+		
+		//Sys.exit(0);
 	}
 }

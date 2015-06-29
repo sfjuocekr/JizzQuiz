@@ -5,7 +5,6 @@ import sys.db.ResultSet;
 import sys.db.Sqlite;
 
 /**
- * ...
  * @author Sjoer van der Ploeg
  */
  
@@ -20,7 +19,8 @@ class Database
 	 */
 	public function new()
 	{
-		if (db == null) db = Sqlite.open("Assets/game.db");
+		if (db == null)
+			db = Sqlite.open("Assets/game.db");
 	}
 	
 	/**
@@ -35,9 +35,7 @@ class Database
 		var _result:Array<Array<String>> = new Array<Array<String>>();
 		
 		for (_row in _request)
-		{
 			_result.push([_row.question, _row.correct,  _row.wrong1,  _row.wrong2]);
-		}
 		
 		return _result;
 	}
@@ -53,11 +51,9 @@ class Database
 		var _result:Array<Array<String>> = new Array<Array<String>>();
 		
 		for (row in _request)
-		{
 			_result.push([row.name, row.score]);
-		}
 		
-		return _result;		
+		return _result;
 	}
 	
 	/**
