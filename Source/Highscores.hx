@@ -3,9 +3,9 @@ package;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import game.Database;
 
 /**
- * ...
  * @author Sjoer van der Ploeg
  */
 

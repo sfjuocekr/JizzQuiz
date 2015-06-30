@@ -1,7 +1,6 @@
-package;
+package game;
 
 /**
- * ...
  * @author Sjoer van der Ploeg
  */
 
