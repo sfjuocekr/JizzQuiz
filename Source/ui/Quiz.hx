@@ -2,13 +2,10 @@ package ui;
 
 import game.Database;
 import game.Questions;
-import ui.Display;
 import openfl.display.Sprite;
-import openfl.events.Event;
-import openfl.events.KeyboardEvent;
 import openfl.events.TimerEvent;
 import openfl.utils.Timer;
-import openfl.Lib;
+import ui.Display;
 
 /**
  * @author Sjoer van der Ploeg
@@ -16,12 +13,11 @@ import openfl.Lib;
 
 class Quiz extends Sprite
 {
-	private var db:game.Database = new game.Database();
-	private var questions:game.Questions;
+	private var db:Database = new Database();
+	private var questions:Questions;
 	private var display:Display;
 	private var timer:Timer = new Timer(1000, 5);
 	private var counter:Timer = new Timer(1000, 0);
-	private var highscores:Highscores;
 	
 	private var quizType:String;
 	private var callback:Void->Void;
@@ -42,7 +38,7 @@ class Quiz extends Sprite
 	
 	private function newGame()
 	{
-		questions = new game.Questions(db.readQuestions(quizType));
+		questions = new Questions(db.readQuestions(quizType));
 		
 		advance();
 		counter.start();
@@ -61,10 +57,11 @@ class Quiz extends Sprite
 		
 		var _score = ((db.readQuestions("capitals").length * 5) - counter.currentCount) * questions.getScore();
 		
-		display.set(["Your score is: " + Std.string(_score), "", "You failed at:", "", _fails], 20, [4]);
+		display.set(["Your score is: " + Std.string(_score), "", "You failed at:", "", _fails, "", "", "Press escape to continue..."], 20, [4]);
 		display.time = -1;
 		
-		//highscores = new Highscores(db, questions.getScore(), counter.currentCount);
+		//TODO: ask the player for his name upon launching the game
+		db.writeScore("Sjoer", _score);
 		
 		counter.reset();
 	}

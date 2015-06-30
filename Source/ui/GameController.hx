@@ -5,10 +5,10 @@ import openfl.display.Sprite;
 import openfl.display.Stage;
 import openfl.events.Event;
 import openfl.events.KeyboardEvent;
+import openfl.events.TimerEvent;
 import openfl.utils.Timer;
 import ui.Display;
 import ui.GameController;
-import openfl.events.TimerEvent;
 
 /**
  * @author Sjoer van der Ploeg
@@ -17,7 +17,7 @@ import openfl.events.TimerEvent;
 class GameController extends Sprite
 {
 	private var db:Database = new Database();
-	private var display:ui.Display = null;
+	private var display:Display = null;
 	private var game:Quiz = null;
 	private var timer:Timer = new Timer(1000, 10);
 	
