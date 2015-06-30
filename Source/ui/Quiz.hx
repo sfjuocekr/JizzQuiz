@@ -13,18 +13,24 @@ import ui.Display;
 
 class Quiz extends Sprite
 {
-	private var db:Database = new Database();
-	private var questions:Questions;
-	private var display:Display;
-	private var timer:Timer = new Timer(1000, 5);
+	private var timer:Timer = new Timer(1000, 6);
 	private var counter:Timer = new Timer(1000, 0);
+	private var db:Database = new Database();
+	private var questions:Questions = null;
+	private var display:Display = null;
+	private var quizType:String = null;
+	private var callback:Dynamic->Void = null;
 	
-	private var quizType:String;
-	private var callback:Void->Void;
-	
-	public function new(_display:Display, _callback:Void->Void, ?_type:String = "capitals")
+	/**
+	 * Initialize a new Quiz game.
+	 * 
+	 * @param	_display	Reference to the main Display object.
+	 * @param	_callback	Callback funtion to pass the players score to.
+	 * @param	_type		The database table to retreive the questions from.
+	 */
+	public function new(_display:Display, _callback:Dynamic->Void, ?_type:String = "capitals")
 	{
-		super ();
+		super();
 		
 		display = _display;
 		callback = _callback;
@@ -36,6 +42,9 @@ class Quiz extends Sprite
 		newGame();
 	}
 	
+	/**
+	 * Start a new game.
+	 */
 	private function newGame()
 	{
 		questions = new Questions(db.readQuestions(quizType));
@@ -44,28 +53,42 @@ class Quiz extends Sprite
 		counter.start();
 	}
 	
+	public function exitGame()
+	{
+		timer.reset();
+		counter.reset();
+		
+		display.time = -1;
+	}
+	
+	/**
+	 * End the currently running game.
+	 */
 	private function endGame()
 	{
 		timer.reset();
 		
 		var _fails:String = "";
 		
-		for (_fail in questions.getFails())
-			_fails = (_fails == "") ? _fail : (questions.getFails().indexOf(_fail) != questions.getFails().length - 1) ? _fails + ", " + _fail : _fails + " and " + _fail;
+		for (_fail in questions.fails)
+			_fails = (_fails == "") ? _fail : (questions.fails.indexOf(_fail) != questions.fails.length - 1) ? _fails + ", " + _fail : _fails + " and " + _fail;
 		
-		_fails = _fails.charAt(0).toUpperCase() + _fails.substring(1) + ".";
+		if (_fails.length != 0)
+			_fails = _fails.charAt(0).toUpperCase() + _fails.substring(1) + ".";
 		
-		var _score = ((db.readQuestions("capitals").length * 5) - counter.currentCount) * questions.getScore();
+		var _score = ((db.readQuestions("capitals").length * 5) - counter.currentCount) * questions.score;
 		
-		display.set(["Your score is: " + Std.string(_score), "", "You failed at:", "", _fails, "", "", "Press escape to continue..."], 20, [4]);
+		display.set(["", "Your score is: " + Std.string(_score), "", (_fails == "") ? "" : (questions.fails.length > 1) ? "FAILS: " + _fails: "FAILED: " + _fails, "", "Press enter to continue..."], [1, 3, 5], 20, [3]);
 		display.time = -1;
 		
-		//TODO: ask the player for his name upon launching the game
-		db.writeScore("Sjoer", _score);
+		callback(_score);
 		
 		counter.reset();
 	}
 	
+	/**
+	 * Advance to the next question or end the game if all questions have been resolved.
+	 */
 	private function advance()
 	{
 		if (questions.next())
@@ -80,6 +103,12 @@ class Quiz extends Sprite
 		}
 	}
 	
+	/**
+	 * Function to parse the text into a readable question.
+	 * 
+	 * @param	_question	The question and answer options to be modified.
+	 * @return				The modified text to be shown to the player.
+	 */
 	private function parseText(_question:Array<String>): Array<String>
 	{
 		for (_index in 0..._question.length)
@@ -93,23 +122,40 @@ class Quiz extends Sprite
 		return _question;
 	}
 	
+	/**
+	 * Function to pass the chosen answer to be resolved to the question object.
+	 * 
+	 * @param	_option		The answer option to resolve.
+	 */
 	public function resolve(_option:Int)
 	{
 		if (counter.running)
 		{
+			questions.resolve((_option == null || timer.currentCount >= 5) ? null : questions.get()[_option]);
+			
 			timer.reset();
-			
-			questions.resolve((_option == null) ? null : questions.get()[_option]);
-			
 			advance();
 		}
 	}
 	
+	/**
+	 * Update the time remaining on screen.
+	 * 
+	 * @param	_event		The TimerEvent object.
+	 */
 	private function onTimer(_event:TimerEvent)
 	{
-		display.time = timer.currentCount;
+		if (counter.running)
+			display.time = timer.currentCount;
+		else
+			display.time = -1;
 	}
 	
+	/**
+	 * The user did not respond on time, advance to the next question.
+	 * 
+	 * @param	_event		The TimerEvent object.
+	 */
 	private function onTimerComplete(_event:TimerEvent)
 	{
 		resolve(null);

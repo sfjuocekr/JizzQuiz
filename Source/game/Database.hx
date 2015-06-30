@@ -15,7 +15,7 @@ class Database
 	/**
 	 * Creates a connection to the game database, which holds the scores and questions.
 	 * 
-	 * The connection reference is static, the class can be reused freely.
+	 * The connection reference is static, this class can be reused freely.
 	 */
 	public function new()
 	{
@@ -26,8 +26,8 @@ class Database
 	/**
 	 * Reads the whole table from the database as a 2D array of strings.
 	 * 
-	 * @param	_table	Table name.
-	 * @param	_cols	Requested collums.
+	 * @param	_table	Name of the requested table.
+	 * @return			Data from the requested table.
 	 */
 	public function readQuestions(_table:String): Array<Array<String>>
 	{
@@ -43,7 +43,7 @@ class Database
 	/**
 	 * Read highscores from the database.
 	 * 
-	 * @param	_limit	The number of scores to fetch.
+	 * @param	_limit	The number of scores to fetch, defaults to 10.
 	 */
 	public function readScores(?_limit:Int = 10): Array<Array<String>>
 	{
@@ -61,7 +61,7 @@ class Database
 	 * 
 	 * @param	_name	The players name.
 	 * @param	_score	The players score.
-	 * @result	True when the score is the new highscore.
+	 * @return			True when the score is the new highscore.
 	 */
 	public function writeScore(_name:String, _score:Int): Bool
 	{

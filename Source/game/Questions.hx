@@ -8,12 +8,15 @@ class Questions
 {
 	private var questions:Array<Array<String>> = new Array<Array<String>>();
 	private var choices:Array<String> = new Array<String>();
-	private var question:String;
-	private var answer:String;
-	private var score:Int = 0;
+	private var question:String = null;
+	private var answer:String = null;
 	
-	private var fails:Array<String> = new Array<String>();
+	public var fails(get, null):Array<String> = new Array<String>();
+	public var score(get, null):Int = 0;
 	
+	/**
+	 * @param	_questions	The array of questions.
+	 */
 	public function new(_questions:Array<Array<String>>)
 	{
 		questions = _questions.copy();
@@ -21,6 +24,9 @@ class Questions
 		questions.push(["", "", "", ""]);
 	}
 	
+	/**
+	 * @return	The next question.
+	 */
 	public function next(): Bool
 	{
 		if (questions.length != 0) set(questions.shift());
@@ -28,33 +34,50 @@ class Questions
 		return (questions.length == 0);
 	}
 	
-	public function getScore(): Int
+	/**
+	 * @return	The players score.
+	 */
+	private function get_score(): Int
 	{
 		return score;
 	}
 	
+	/**
+	 * @return	The answers the player answered wrong.
+	 */
+	private function get_fails(): Array<String>
+	{
+		return fails;
+	}
+	
+	/**
+	 * Checks if the given input was correct and modifies the score accordingly.
+	 * 
+	 * @param	_input	The chosen answer.
+	 */
 	public function resolve(_input:String)
 	{
 		if (_input != answer)
 		{
 			fails.push(question);
 			
-			score -= (question == null) ? 2 : 1;
+			score -= (_input == null) ? 2 : 1;
 		}
 		else
 			score += 2;
 	}
 	
-	public function getFails(): Array<String>
-	{
-		return fails;
-	}
-	
+	/**
+	 * @return	The current question and its answer options.
+	 */
 	public function get(): Array<String>
 	{
 		return [question, choices[0],  choices[1],  choices[2]];
 	}
 	
+	/**
+	 * @param	_question	The next question and its answer options.
+	 */
 	private function set(_question:Array<String>)
 	{
 		question = _question.shift();
@@ -65,6 +88,9 @@ class Questions
 		choices = _question.copy();
 	}
 	
+	/**
+	 * @param	_answers	The array to be randomized.
+	 */
 	private function randomize(_answers:Array<Dynamic>)
 	{
 		for (i in _answers.iterator())
