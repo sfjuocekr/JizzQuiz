@@ -20,7 +20,7 @@ class GameController extends Sprite
 	private var display:Display = null;
 	private var game:Quiz = null;
 	private var playerName:TextInput = null;
-	private var score:Int = null;
+	private var score:Int = 0;
 	
 	/**
 	 * Initialize a new GameController, this class manages user input and everything that is to be shown on screen.
@@ -100,7 +100,7 @@ class GameController extends Sprite
 				game = new Quiz(display, callback, "capitals");
 			addChild(game);
 		}
-		else if (game != null && score != null)
+		else if (game != null && score != 0)
 		{
 			if (playerName == null)
 			{
@@ -176,7 +176,7 @@ class GameController extends Sprite
 		removeChild(playerName);
 		
 		playerName = null;
-		score = null;
+		score = 0;
 		game = null;
 	}
 	

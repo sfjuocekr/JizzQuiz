@@ -131,7 +131,7 @@ class Quiz extends Sprite
 	{
 		if (counter.running)
 		{
-			questions.resolve((_option == null || timer.currentCount >= 5) ? null : questions.get()[_option]);
+			questions.resolve((_option == 0 || timer.currentCount >= 5) ? "" : questions.get()[_option]);
 			
 			timer.reset();
 			advance();
@@ -158,6 +158,6 @@ class Quiz extends Sprite
 	 */
 	private function onTimerComplete(_event:TimerEvent)
 	{
-		resolve(null);
+		resolve(0);
 	}
 }
